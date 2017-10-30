@@ -20,7 +20,7 @@ MQTT_HOST = os.environ['MQTT_SERVER']
 MQTT_PORT = int(os.environ['MQTT_PORT'])
 MQTT_USERNAME = os.environ['USER']
 MQTT_PASSWORD = os.environ['PASSWORD']
-MQTT_CLIENT_ID = HOSTNAME
+MQTT_CLIENT_ID = os.environ['MQTT_CLIENT'] if 'MQTT_CLIENT' in os.environ else HOSTNAME
 MQTT_TOPIC = os.environ['TOPIC']
 ADB_DEVICES = os.environ['ADB_DEVICE'].split(",")
 
