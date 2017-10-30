@@ -4,13 +4,12 @@ MAINTAINER Marcel van der Veldt <m.vanderveldt@outlook.com>
 ENV LANG C.UTF-8
 
 RUN apt-get update
-RUN apt-get install -y android-tools-adb
-RUN apt-get install -y mosquitto-clients
-RUN apt-get install -y jq
+RUN apt-get install -y android-tools-adb mosquitto-clients jq python python-pip
+RUN pip install paho-mqtt
 
 
 # Copy data for add-on
-COPY run.sh /
-RUN chmod a+x /run.sh
+COPY adb_monitor.py /
+RUN chmod a+x /adb_monitor.py
 
-CMD [ "/run.sh" ]
+CMD [ "/adb_monitor.py" ]
