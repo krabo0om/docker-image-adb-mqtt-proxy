@@ -219,7 +219,7 @@ def poll():
     The main loop in which we monitor the state of the devices
     and publish any changes.
     """
-    check_interval = 1
+    check_interval = 5
     while True:
         try:
             # monitor states
