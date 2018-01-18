@@ -3,10 +3,19 @@ MAINTAINER Marcel van der Veldt <m.vanderveldt@outlook.com>
 
 ENV LANG C.UTF-8
 
-RUN apt-get update
-RUN apt-get install -y android-tools-adb mosquitto-clients jq python python-pip
-RUN pip install paho-mqtt
+ENV MQTT_SERVER localhost
+ENV MQTT_PORT 1883
+ENV TOPIC adb
+ENV USER
+ENV PASSWORD
+ENV ADB_DEVICE
 
+RUN apt-get update && \
+    apt-get install -y android-tools-adb mosquitto-clients jq python python-pip && \
+    pip install paho-mqtt
+
+# adb settings are stored in home
+VOLUME /home
 
 # Copy data for add-on
 COPY adb_monitor.py /
