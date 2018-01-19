@@ -1,5 +1,5 @@
-FROM debian:jessie
-MAINTAINER Marcel van der Veldt <m.vanderveldt@outlook.com>
+FROM python:3.6
+LABEL maintainer="Marcel van der Veldt <m.vanderveldt@outlook.com>"
 
 ENV LANG C.UTF-8
 
@@ -10,12 +10,11 @@ ENV USER mqttuser
 ENV PASSWORD mqttpass
 ENV ADB_DEVICE 192.168.1.243
 
-RUN apt-get update && \
-    apt-get install -y android-tools-adb mosquitto-clients jq python python-pip && \
-    pip install paho-mqtt
+RUN ls -s /config /root/.android
+RUN pip3 install --no-cache-dir adb
 
-# adb settings are stored in home
-VOLUME /home
+# adb settings must be persistant
+VOLUME /config
 
 # Copy data for add-on
 COPY adb_monitor.py /
