@@ -33,7 +33,7 @@ MQTT_LWT = "clients/%s" % MQTT_CLIENT_ID
 # Initialise logger
 LOGFORMAT = '%(asctime)-15s %(levelname)-5s %(message)s'
 logger = logging.getLogger(APPNAME)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO) # loglevel for console
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -100,7 +100,7 @@ def on_disconnect(mosq, obj, result_code):
     if result_code == 0:
         logger.info("Clean disconnection from broker")
     else:
-        logger.info("Broker connection lost. Retrying in 5s...")
+        logger.warning("Broker connection lost. Retrying in 5s...")
         time.sleep(5)
 
 def on_message(mosq, obj, msg):
@@ -111,7 +111,7 @@ def on_message(mosq, obj, msg):
     topicparts = msg.topic.split("/")
     adb_device = topicparts[-2]
     value = msg.payload.strip()
-    logger.info("Incoming message for device %s -> %s" % (adb_device, value))
+    logger.debug("Incoming message for device %s -> %s" % (adb_device, value))
 
     if adb_device not in ADB_DEVICES:
         "Requested device is not monitored !"
@@ -145,7 +145,7 @@ def adb_command(adb_device, adb_cmd):
 
 def adb_connect():
     '''conect adb devices'''
-    logger.info("Connect to ADB service ")
+    logger.debug("Connect to ADB service ")
     for adb_device in ADB_DEVICES:
         adb_device = adb_device + ":5555"
         subprocess.call('adb disconnect %s' % adb_device, shell=True)
@@ -161,7 +161,7 @@ def publish_state():
         else:
             state = "OFF"
         if STATES.get(adb_device,"") != state:
-            logger.info("State changed for device %s - new state: %s" %(adb_device, state))
+            logger.debug("State changed for device %s - new state: %s" %(adb_device, state))
             mqtt_topic = "%s/%s/stat" % (MQTT_TOPIC, adb_device)
             mqttc.publish(mqtt_topic, payload=state, qos=MQTT_QOS, retain=MQTT_RETAIN)
             STATES[adb_device] = state
