@@ -23,6 +23,7 @@ MQTT_CLIENT_ID = os.environ['MQTT_CLIENT'] if 'MQTT_CLIENT' in os.environ else H
 MQTT_TOPIC = os.environ['TOPIC']
 ADB_DEVICES = os.environ['ADB_DEVICE'].split(",")
 POLL_INTERVAL = int(os.environ['POLL_INTERVAL'])
+DEBUG = True if 'DEBUG' in os.environ else False
 
 # other MQTT settings
 MQTT_QOS = 2
@@ -36,6 +37,8 @@ logger = logging.getLogger(APPNAME)
 logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO) # loglevel for console
+if DEBUG:
+    ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
@@ -131,11 +134,17 @@ def adb_command(adb_device, adb_cmd):
     if adb_cmd and adb_cmd.startswith("shell") and adb_cmd != "shell":
         # issue adb command
         adb_cmd = "adb -s %s:5555 %s" %(adb_device, adb_cmd)
-        output = check_output(adb_cmd, shell=True, universal_newlines=True)
-        if not output:
-            logger.error("ADB command failed - issue reconnect...")
-            adb_connect()
+        try:
             output = check_output(adb_cmd, shell=True, universal_newlines=True)
+        except Exception as exc:
+            logger.debug(exc)
+        if not output:
+            logger.debug("ADB command failed - issue reconnect...")
+            adb_connect()
+            try:
+                output = check_output(adb_cmd, shell=True, universal_newlines=True)
+            except Exception as exc:
+                logger.debug(exc)
     else:
         logger.error("Invalid command, only shell commands are supported")
     return output
@@ -147,8 +156,10 @@ def adb_connect():
         adb_device = adb_device + ":5555"
         for cmd in ["disconnect", "connect"]:
             adb_cmd = 'adb %s %s' % (cmd, adb_device)
-            output = check_output(adb_cmd, shell=True, universal_newlines=True)
-            logger.debug(output)
+            try:
+                output = check_output(adb_cmd, shell=True, universal_newlines=True)
+            except Exception as exc:
+                logger.debug(exc)
 
 
 def publish_state():
