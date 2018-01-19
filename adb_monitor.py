@@ -9,7 +9,7 @@ import time
 import ssl
 import paho.mqtt.client as mqtt
 import socket
-import subprocess
+from subprocess import check_output
 
 # Script name (without extension) used for config/logfile names
 HOSTNAME = socket.gethostname()
@@ -131,14 +131,11 @@ def adb_command(adb_device, adb_cmd):
     if adb_cmd and adb_cmd.startswith("shell") and adb_cmd != "shell":
         # issue adb command
         adb_cmd = "adb -s %s:5555 %s" %(adb_device, adb_cmd)
-        adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output = adb_proc.communicate()[0]
-        returncode = adb_proc.returncode
-        if returncode > 0:
+        output = subprocess.check_output(adb_cmd, shell=True, universal_newlines=True)
+        if not output:
             logger.error("ADB command failed - issue reconnect...")
             adb_connect()
-            adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output = adb_proc.communicate()[0]
+            output = subprocess.check_output(adb_cmd, shell=True, universal_newlines=True)
     else:
         logger.error("Invalid command, only shell commands are supported")
     return output
@@ -150,8 +147,8 @@ def adb_connect():
         adb_device = adb_device + ":5555"
         for cmd in ["disconnect", "connect"]:
             adb_cmd = 'adb %s %s' % (cmd, adb_device)
-            adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            adb_proc.communicate()
+            output = subprocess.check_output(adb_cmd, shell=True, universal_newlines=True)
+            logger.debug(output)
 
 
 def publish_state():
