@@ -9,7 +9,6 @@ import time
 import ssl
 import paho.mqtt.client as mqtt
 import socket
-from traceback import format_exc
 import subprocess
 
 # Script name (without extension) used for config/logfile names
@@ -23,6 +22,7 @@ MQTT_PASSWORD = os.environ['PASSWORD']
 MQTT_CLIENT_ID = os.environ['MQTT_CLIENT'] if 'MQTT_CLIENT' in os.environ else HOSTNAME
 MQTT_TOPIC = os.environ['TOPIC']
 ADB_DEVICES = os.environ['ADB_DEVICE'].split(",")
+POLL_INTERVAL = int(os.environ['POLL_INTERVAL'])
 
 # other MQTT settings
 MQTT_QOS = 2
@@ -221,15 +221,13 @@ def poll():
     The main loop in which we monitor the state of the devices
     and publish any changes.
     """
-    check_interval = 5
     while True:
         try:
             # monitor states
             publish_state()
         except Exception as exc:
             logger.error(str(exc))
-            logger.debug(format_exc(sys.exc_info()))
-        time.sleep(check_interval)
+        time.sleep(POLL_INTERVAL)
 
 # Use the signal module to handle signals
 for sig in [signal.SIGTERM, signal.SIGINT, signal.SIGHUP, signal.SIGQUIT]:
