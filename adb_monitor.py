@@ -136,13 +136,15 @@ def adb_command(adb_device, adb_cmd):
         adb_cmd = "adb -s %s:5555 %s" %(adb_device, adb_cmd)
         try:
             output = check_output(adb_cmd, shell=True, universal_newlines=True)
+            logger.debug(output)
         except Exception as exc:
             logger.debug(exc)
-        if not output:
+        if not output or "error" in output:
             logger.debug("ADB command failed - issue reconnect...")
             adb_connect()
             try:
                 output = check_output(adb_cmd, shell=True, universal_newlines=True)
+                logger.debug(output)
             except Exception as exc:
                 logger.debug(exc)
     else:
@@ -158,6 +160,7 @@ def adb_connect():
             adb_cmd = 'adb %s %s' % (cmd, adb_device)
             try:
                 output = check_output(adb_cmd, shell=True, universal_newlines=True)
+                logger.debug(output)
             except Exception as exc:
                 logger.debug(exc)
 
