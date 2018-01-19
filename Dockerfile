@@ -9,6 +9,7 @@ ENV TOPIC adb
 ENV USER mqttuser
 ENV PASSWORD mqttpass
 ENV ADB_DEVICE 192.168.1.243
+ENV POLL_INTERVAL 5
 
 RUN apt-get update && \
     apt-get install -y android-tools-adb mosquitto-clients jq python python-pip && \
