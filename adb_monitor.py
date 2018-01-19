@@ -131,13 +131,13 @@ def adb_command(adb_device, adb_cmd):
     if adb_cmd and adb_cmd.startswith("shell") and adb_cmd != "shell":
         # issue adb command
         adb_cmd = "adb -s %s:5555 %s" %(adb_device, adb_cmd)
-        adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE)
+        adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = adb_proc.communicate()[0]
         returncode = adb_proc.returncode
         if returncode > 0:
             logger.error("ADB command failed - issue reconnect...")
             adb_connect()
-            adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE)
+            adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = adb_proc.communicate()[0]
     else:
         logger.error("Invalid command, only shell commands are supported")
@@ -148,8 +148,10 @@ def adb_connect():
     logger.debug("Connect to ADB service ")
     for adb_device in ADB_DEVICES:
         adb_device = adb_device + ":5555"
-        subprocess.call('adb disconnect %s' % adb_device, shell=True)
-        subprocess.call('adb connect %s' % adb_device, shell=True)
+        for cmd in ["disconnect", "connect"]:
+            adb_cmd = 'adb %s %s' % (cmd, adb_device)
+            adb_proc = subprocess.Popen(adb_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            adb_proc.communicate()
 
 
 def publish_state():
